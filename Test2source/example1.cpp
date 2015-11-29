@@ -98,12 +98,88 @@ colorcube()
     quad_cube( 5, 4, 0, 1 );
 }
 
+//---- triangle model
+//----------------------------------------------------------------------------
+const int NumVerticesTri = 24; //(3 faces)(2 triangles/ face)+(2 caps)(1 triangle/ cap)*(3 vertices/triangle)
+point4 points_tri[NumVerticesTri];
+vec3   tnormals[NumVerticesTri];
+vec2   ttex_coords[NumVerticesTri];
+
+// Vertices of a unit cube centered at origin, sides aligned with axes
+point4 tri_vertices[6] = {
+    point4( -0.5, -0.5,  0.5, 1.0 ),
+    point4( -0.5,  0.5,  0.5, 1.0 ),
+    point4(  0.5,  0.5,  0.5, 1.0 ),
+    point4(  0.5, -0.5,  0.5, 1.0 ),
+    point4(  0.0, -0.5, -0.5, 1.0 ),
+    point4(  0.0,  0.5, -0.5, 1.0 )
+};
+// quad generates two triangles for each face
+void
+quad_tri( int a, int b, int c, int d )
+{
+    // Initialize temporary vectors along the quad's edge to compute its face normal
+    vec4 u = tri_vertices[b] - tri_vertices[a];
+    vec4 v = tri_vertices[c] - tri_vertices[b];
+    
+    vec3 normal = normalize( cross(u, v) );
+    
+    tnormals[Index] = normal; points_tri[Index] = tri_vertices[a]; ttex_coords[Index] = vec2( 1.0, 1.0 ); Index++;
+    tnormals[Index] = normal; points_tri[Index] = tri_vertices[b]; ttex_coords[Index] = vec2( 1.0, 0.0 ); Index++;
+    tnormals[Index] = normal; points_tri[Index] = tri_vertices[c]; ttex_coords[Index] = vec2( 0.0, 0.0 ); Index++;
+    tnormals[Index] = normal; points_tri[Index] = tri_vertices[a]; ttex_coords[Index] = vec2( 1.0, 1.0 ); Index++;
+    tnormals[Index] = normal; points_tri[Index] = tri_vertices[c]; ttex_coords[Index] = vec2( 0.0, 0.0 ); Index++;
+    tnormals[Index] = normal; points_tri[Index] = tri_vertices[d]; ttex_coords[Index] = vec2( 0.0, 1.0 ); Index++;
+}
+
+void
+sing_tri( int a, int b, int c )
+{
+    // Initialize temporary vectors along the quad's edge to compute its face normal
+    vec4 u = tri_vertices[b] - tri_vertices[a];
+    vec4 v = tri_vertices[c] - tri_vertices[b];
+    
+    vec3 normal = normalize( cross(u, v) );
+    
+    tnormals[Index] = normal; points_tri[Index] = tri_vertices[a]; ttex_coords[Index] = vec2( 1.0, 1.0 ); Index++;
+    tnormals[Index] = normal; points_tri[Index] = tri_vertices[b]; ttex_coords[Index] = vec2( 1.0, 0.0 ); Index++;
+    tnormals[Index] = normal; points_tri[Index] = tri_vertices[c]; ttex_coords[Index] = vec2( 0.0, 0.0 ); Index++;
+}
+
+// generate 8 triangles: 24 vertices
+void
+colortri()
+{
+    Index = 0;
+    quad_tri( 1, 0, 3, 2 );
+    quad_tri( 2, 3, 4, 5 );
+    quad_tri( 5, 4, 0, 1 );
+    sing_tri( 5, 1, 2);
+    sing_tri(3, 0, 4);
+    /*
+    vec4 u = tri_vertices[2] - tri_vertices[1];
+    vec4 v = tri_vertices[5] - tri_vertices[2];
+    vec3 normal = normalize( cross(u,v) );
+    tnormals[Index] = normal; points_tri[Index] = tri_vertices[1]; Index++;
+    tnormals[Index] = normal; points_tri[Index] = tri_vertices[2]; Index++;
+    tnormals[Index] = normal; points_tri[Index] = tri_vertices[5]; Index++;
+    
+    u = tri_vertices[3] - tri_vertices[0];
+    v = tri_vertices[4] - tri_vertices[3];
+    normal = normalize( cross(u,v) );
+    tnormals[Index] = normal; points_tri[Index] = tri_vertices[0]; Index++;
+    tnormals[Index] = normal; points_tri[Index] = tri_vertices[3]; Index++;
+    tnormals[Index] = normal; points_tri[Index] = tri_vertices[4]; Index++;
+     */
+}
+
+
 //---- cylinder model
 //----------------------------------------------------------------------------
 const int segments = 64;
 const int NumVerticesCylinder = segments*6 + segments*3*2;
 point4 points_cylinder[NumVerticesCylinder];
-vec3   tnormals[NumVerticesCylinder];
+vec3   cnormals[NumVerticesCylinder];
 point4 vertices_cylinder[4];
 
 // quad generates two triangles for each face and assigns colors to the vertices
@@ -111,17 +187,17 @@ void
 quad_cylinder( int a, int b, int c, int d )
 {
     points_cylinder[Index] = vertices_cylinder[a];
-    tnormals[Index] = vec3(vertices_cylinder[a].x, 0.0, vertices_cylinder[a].z); Index++;
+    cnormals[Index] = vec3(vertices_cylinder[a].x, 0.0, vertices_cylinder[a].z); Index++;
     points_cylinder[Index] = vertices_cylinder[b];
-    tnormals[Index] = vec3(vertices_cylinder[b].x, 0.0, vertices_cylinder[b].z); Index++;
+    cnormals[Index] = vec3(vertices_cylinder[b].x, 0.0, vertices_cylinder[b].z); Index++;
     points_cylinder[Index] = vertices_cylinder[c];
-    tnormals[Index] = vec3(vertices_cylinder[c].x, 0.0, vertices_cylinder[c].z); Index++;
+    cnormals[Index] = vec3(vertices_cylinder[c].x, 0.0, vertices_cylinder[c].z); Index++;
     points_cylinder[Index] = vertices_cylinder[a];
-    tnormals[Index] = vec3(vertices_cylinder[a].x, 0.0, vertices_cylinder[a].z); Index++;
+    cnormals[Index] = vec3(vertices_cylinder[a].x, 0.0, vertices_cylinder[a].z); Index++;
     points_cylinder[Index] = vertices_cylinder[c];
-    tnormals[Index] = vec3(vertices_cylinder[c].x, 0.0, vertices_cylinder[c].z); Index++;
+    cnormals[Index] = vec3(vertices_cylinder[c].x, 0.0, vertices_cylinder[c].z); Index++;
     points_cylinder[Index] = vertices_cylinder[d];
-    tnormals[Index] = vec3(vertices_cylinder[d].x, 0.0, vertices_cylinder[d].z); Index++;
+    cnormals[Index] = vec3(vertices_cylinder[d].x, 0.0, vertices_cylinder[d].z); Index++;
 }
 
 float const bottom = -0.5;
@@ -142,22 +218,21 @@ colortube(void)
         points_cylinder[Index].y = top;
         points_cylinder[Index].z = 0.0;
         points_cylinder[Index].w = 1.0;
-        tnormals[Index] = vec3(0.0, 1.0, 0.0);
+        cnormals[Index] = vec3(0.0, 1.0, 0.0);
         Index++;
         points_cylinder[Index].x = cos(t0) * r;
         points_cylinder[Index].y = top;
         points_cylinder[Index].z = sin(t0) * r;
         points_cylinder[Index].w = 1.0;
-        tnormals[Index] = vec3(0.0, 1.0, 0.0);
+        cnormals[Index] = vec3(0.0, 1.0, 0.0);
         Index++;
         points_cylinder[Index].x = cos(t1) * r;
         points_cylinder[Index].y = top;
         points_cylinder[Index].z = sin(t1) * r;
         points_cylinder[Index].w = 1.0;
-        tnormals[Index] = vec3(0.0, 1.0, 0.0);
+        cnormals[Index] = vec3(0.0, 1.0, 0.0);
         Index++;
     }
-    
     
     int num;
     for ( int n = 0; n < segments; n++ )
@@ -201,19 +276,19 @@ colortube(void)
         points_cylinder[Index].y = bottom;
         points_cylinder[Index].z = 0.0;
         points_cylinder[Index].w = 1.0;
-        tnormals[Index] = vec3(0.0, -1.0, 0.0);
+        cnormals[Index] = vec3(0.0, -1.0, 0.0);
         Index++;
         points_cylinder[Index].x = cos(t1) * r;
         points_cylinder[Index].y = bottom;
         points_cylinder[Index].z = sin(t1) * r;
         points_cylinder[Index].w = 1.0;
-        tnormals[Index] = vec3(0.0, -1.0, 0.0);
+        cnormals[Index] = vec3(0.0, -1.0, 0.0);
         Index++;
         points_cylinder[Index].x = cos(t0) * r;
         points_cylinder[Index].y = bottom;
         points_cylinder[Index].z = sin(t0) * r;
         points_cylinder[Index].w = 1.0;
-        tnormals[Index] = vec3(0.0, -1.0, 0.0);
+        cnormals[Index] = vec3(0.0, -1.0, 0.0);
         Index++;
     }
     
@@ -376,7 +451,7 @@ GLuint vColor;
 GLuint vNormal;
 GLuint vTexCoord;
 
-GLuint textures[13];
+GLuint textures[14];
 
 
 size_t CUBE_OFFSET;
@@ -391,6 +466,10 @@ size_t SPHERE_N_OFFSET;
 size_t CUBE_TEX_OFFSET;
 size_t SPHERE_TEX_OFFSET;
 
+size_t TRI_OFFSET;
+size_t TRI_N_OFFSET;
+size_t TRI_TEX_OFFSET;
+
 void
 init()
 {
@@ -402,9 +481,10 @@ init()
     colorcube();
     colortube();
     colorbube();
+    colortri();
     
     //---- Initialize texture objects
-    glGenTextures(13, textures);
+    glGenTextures(14, textures);
     
     glActiveTexture( GL_TEXTURE0 );
     
@@ -542,12 +622,22 @@ init()
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
     
-    
     unsigned char* pic13 = NULL;
     loadBMP_custom(&pic13, &w, &h, "Brick3.bmp");
     
     glBindTexture(GL_TEXTURE_2D, textures[12]);
     glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_BGR, GL_UNSIGNED_BYTE, pic13 );
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    
+    unsigned char* pic14 = NULL;
+    loadBMP_custom(&pic14, &w, &h, "Hotel.bmp");
+    
+    glBindTexture(GL_TEXTURE_2D, textures[13]);
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_BGR, GL_UNSIGNED_BYTE, pic14 );
     glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT );
@@ -594,10 +684,14 @@ init()
     CYLINDER_N_OFFSET = CUBE_N_OFFSET + sizeof(normals);
     
     SPHERE_OFFSET = CYLINDER_OFFSET + sizeof(points_cylinder);
-    SPHERE_N_OFFSET = CYLINDER_N_OFFSET + sizeof(tnormals);
+    SPHERE_N_OFFSET = CYLINDER_N_OFFSET + sizeof(cnormals);
     
     CUBE_TEX_OFFSET = SPHERE_N_OFFSET + sizeof(bnormals);
     SPHERE_TEX_OFFSET = CUBE_TEX_OFFSET + sizeof(tex_coords);
+    
+    TRI_OFFSET = SPHERE_TEX_OFFSET + sizeof(stex_coords);
+    TRI_N_OFFSET = TRI_OFFSET + sizeof(points_tri);
+    TRI_TEX_OFFSET = TRI_N_OFFSET + sizeof(tnormals);
     
     //---- Create a vertex array object
     
@@ -611,17 +705,21 @@ init()
     glBindBuffer( GL_ARRAY_BUFFER, buffer );
     glBufferData( GL_ARRAY_BUFFER, sizeof(points_cube) + sizeof(colors) +
                  sizeof(points_cylinder) + sizeof(points_sphere)+
-                 sizeof(normals) + sizeof(tnormals) + sizeof(bnormals) + sizeof(tex_coords) + sizeof(stex_coords),
+                 sizeof(normals) + sizeof(cnormals) + sizeof(bnormals) + sizeof(tex_coords) +
+                 sizeof(stex_coords) + sizeof(points_tri) + sizeof(tnormals) + sizeof(ttex_coords),
                  NULL, GL_STATIC_DRAW );
     glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof(points_cube), points_cube );
     glBufferSubData( GL_ARRAY_BUFFER, sizeof(points_cube), sizeof(colors), colors );
     glBufferSubData( GL_ARRAY_BUFFER, CYLINDER_OFFSET, sizeof(points_cylinder), points_cylinder );
     glBufferSubData( GL_ARRAY_BUFFER, SPHERE_OFFSET, sizeof(points_sphere), points_sphere );
     glBufferSubData( GL_ARRAY_BUFFER, CUBE_N_OFFSET, sizeof(normals), normals );
-    glBufferSubData( GL_ARRAY_BUFFER, CYLINDER_N_OFFSET, sizeof(tnormals), tnormals );
+    glBufferSubData( GL_ARRAY_BUFFER, CYLINDER_N_OFFSET, sizeof(cnormals), cnormals );
     glBufferSubData( GL_ARRAY_BUFFER, SPHERE_N_OFFSET, sizeof(bnormals), bnormals );
     glBufferSubData( GL_ARRAY_BUFFER, CUBE_TEX_OFFSET, sizeof(tex_coords), tex_coords );
     glBufferSubData( GL_ARRAY_BUFFER, SPHERE_TEX_OFFSET, sizeof(stex_coords), stex_coords );
+    glBufferSubData( GL_ARRAY_BUFFER, TRI_OFFSET, sizeof(points_tri), points_tri);
+    glBufferSubData( GL_ARRAY_BUFFER, TRI_N_OFFSET, sizeof(tnormals), tnormals);
+    glBufferSubData( GL_ARRAY_BUFFER, TRI_TEX_OFFSET, sizeof(ttex_coords), ttex_coords);
     
     //---------------------------------------------------------------------
     
@@ -687,8 +785,8 @@ SetLight( vec4 lpos, vec4 la, vec4 ld, vec4 ls )
 }
 
 //----------------------------------------------------------------------------
-enum Shape { CUBE, CYL, SPHERE };
-enum Texture { GRASS, BRICK, ASPHAULT, CEMENT, WOOD, BRICK2, BOARDS, SAND, ROOF, STONE, STONE2, CSTONE, BRICK3 };
+enum Shape { CUBE, CYL, SPHERE, TRI };
+enum Texture { GRASS, BRICK, ASPHAULT, CEMENT, WOOD, BRICK2, BOARDS, SAND, ROOF, STONE, STONE2, CSTONE, BRICK3, HOTEL };
 
 void drawObject(mat4 model, size_t offset, size_t n_offset, int numVertices)
 {
@@ -728,6 +826,8 @@ void draw(mat4 model, Shape shape)
         case SPHERE:
             drawObject(model, SPHERE_OFFSET, SPHERE_N_OFFSET, NumVerticesSphere);
             break;
+        case TRI:
+            drawObject(model, TRI_OFFSET, TRI_N_OFFSET, NumVerticesTri);
         default:
             break;
     }
@@ -743,6 +843,8 @@ void draw(mat4 model, Shape shape, Texture texture, float st_factor)
         case SPHERE:
             drawTextObject(model, SPHERE_OFFSET, SPHERE_N_OFFSET, SPHERE_TEX_OFFSET, NumVerticesSphere, texture, st_factor);
             break;
+        case TRI:
+            drawTextObject(model, TRI_OFFSET, TRI_N_OFFSET, TRI_TEX_OFFSET, NumVerticesTri, texture, st_factor);
         default:
             break;
     }
@@ -762,8 +864,11 @@ void drawBuilding(mat4 position, vec3 size, float doorOffset, Texture texture)
     model = position * Translate(doorOffset, 0.31 , -size.z/2) * Scale(0.3, 0.6, 0.01);
     draw(model, CUBE, WOOD, 4.0);
     
-    vec3 roof_size = vec3(size.x + 0.1, 0.05, size.z/2 + 0.1);
+    vec3 roof_size = vec3(size.x, 0.1, size.z + 0.1);
     
+    model = position * Translate(0.0, roof_size.y/2 + size.y + 0.01, 0.0) * Scale(roof_size) * RotateY(90) * RotateX(90);
+    draw(model, TRI, ROOF, 4.0);
+    /*
     //--- Roof 1
     model = position * Translate(0.0, roof_size.y/2 + size.y + 0.01, roof_size.z/2 ) * RotateX(2.5) * Scale(roof_size) * RotateY(90);
     draw(model, CUBE, ROOF, 4.0);
@@ -771,6 +876,7 @@ void drawBuilding(mat4 position, vec3 size, float doorOffset, Texture texture)
     //--- Roof 1
     model = position * Translate(0.0, roof_size.y/2 + size.y + 0.01, -roof_size.z/2 ) * RotateX(-2.5) * Scale(roof_size) * RotateY(90);
     draw(model, CUBE, ROOF, 4.0);
+     */
 }
 
 void drawRoad(mat4 position, float length)
@@ -1172,7 +1278,7 @@ void grid8(mat4 grid_pos_matrix)
     
     //--- brick building 1
     model = grid_pos_matrix * Translate( 0.5, 1.251, 0.5 ) * Scale(2.0, 2.5, 4.0);
-    draw(model, CUBE, BRICK2, 4.0);
+    draw(model, CUBE, , 4.0);
     
     //--- middle building
     position = grid_pos_matrix * Translate(-1.75, 0.0, -0.5) * RotateY(180);
@@ -1238,7 +1344,7 @@ void grid11(mat4 grid_pos_matrix)
     
     //--- main building
     SetMaterial(vec4(0.9, 0.9, 0.9, 1.0), vec4(0.9, 0.9, 0.9, 1.0), vec4(0.9, 0.9, 0.9, 1.0), 5.0);
-    model = grid_pos_matrix * Translate( 0.0, 1.251, 0.4 ) * Scale(7.0, 2.5, 3.8);
+    model = grid_pos_matrix * Translate( 0.0, 1.26, 0.4 ) * Scale(7.0, 2.5, 3.8);
     draw(model, CUBE);
     
     //---- stairs
@@ -1267,6 +1373,11 @@ void grid11(mat4 grid_pos_matrix)
     //--- pillar 4
     transform_tube = grid_pos_matrix * Translate( 1.0, 1.56, 2.5 ) * Scale(0.25, 1.9, 0.25);
     draw(transform_tube, CYL);
+    
+    //--- Top
+    SetMaterial(vec4(0.9, 0.9, 0.9, 1.0), vec4(0.9, 0.9, 0.9, 1.0), vec4(0.9, 0.9, 0.9, 1.0), 5.0);
+    model = grid_pos_matrix * Translate( 0.0, 3.01, 0.6 ) * Scale(7.0, 1.0, 4.2) * RotateX(90);
+    draw(model, TRI);
     
     //--- entrance sidewalk
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
@@ -1703,7 +1814,7 @@ display( void )
     //loadGrids();
     
     grid11(Translate(-10.0, 0.0, 10.0));
-    grid17(Translate(0.0, 0.0, 0.0));
+    grid8(Translate(0.0, 0.0, 0.0));
     
     // far side pole -3.15
     
