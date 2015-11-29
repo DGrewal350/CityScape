@@ -173,7 +173,6 @@ colortri()
      */
 }
 
-
 //---- cylinder model
 //----------------------------------------------------------------------------
 const int segments = 64;
@@ -451,7 +450,7 @@ GLuint vColor;
 GLuint vNormal;
 GLuint vTexCoord;
 
-GLuint textures[14];
+GLuint textures[16];
 
 
 size_t CUBE_OFFSET;
@@ -484,7 +483,7 @@ init()
     colortri();
     
     //---- Initialize texture objects
-    glGenTextures(14, textures);
+    glGenTextures(16, textures);
     
     glActiveTexture( GL_TEXTURE0 );
     
@@ -645,7 +644,7 @@ init()
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
     
     //---- cube maps
-    /*
+    
     unsigned char* negx_s = NULL;
     loadBMP_custom(&negx_s, &w, &h, "negx_s.bmp");
     unsigned char* negy_s = NULL;
@@ -660,7 +659,7 @@ init()
     loadBMP_custom(&posz_s, &w, &h, "posz_s.bmp");
     
     glActiveTexture( GL_TEXTURE1 );
-    glBindTexture( GL_TEXTURE_CUBE_MAP, textures[5] );
+    glBindTexture( GL_TEXTURE_CUBE_MAP, textures[14] );
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGB, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, posx_s);
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGB, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, posy_s);
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGB, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, posz_s);
@@ -672,7 +671,7 @@ init()
     glTexParameterf( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_REPEAT );
     glTexParameterf( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     glTexParameterf( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-    */
+    
     //---------------------------------------------------------------------
     
     //----set offset variables
@@ -885,6 +884,11 @@ void drawRoad(mat4 position, float length)
     SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
     mat4 model = position * Scale(length, 0.01, 2.5);
     draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //---- middle line
+    SetMaterial( vec4(1.0,1.0,0.0,1.0), vec4(1.0,1.0,0.0,1.0), vec4(1.0,1.0,0.0,1.0), 10.0);
+    model = position * Translate(0.0, 0.0105, 0.0) * Scale(length, 0.001, 0.125);
+    draw(model, CUBE);
     
     //--- road 1 -right sidewalk 1
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
@@ -1271,26 +1275,42 @@ void grid8(mat4 grid_pos_matrix)
     model = grid_pos_matrix * Translate( 4.75, 0.015, 3.75) * Scale(0.5, 0.04, 2.5);
     draw(model, CUBE);
     
-    //----building ( 3 in 1)
+    //----building ( 3 in 1) w/ flat roof
     //---foundation 1
     model = grid_pos_matrix * Translate( 0.5, 0.01, 0.5 ) * Scale(2.1, 0.01, 4.1);
     draw(model, CUBE, CEMENT, 4.0);
     
     //--- brick building 1
-    model = grid_pos_matrix * Translate( 0.5, 1.251, 0.5 ) * Scale(2.0, 2.5, 4.0);
-    draw(model, CUBE, , 4.0);
+    model = grid_pos_matrix * Translate( 0.5, 1.26, 0.5 ) * Scale(2.0, 2.5, 4.0);
+    draw(model, CUBE, HOTEL, 4.0);
     
-    //--- middle building
-    position = grid_pos_matrix * Translate(-1.75, 0.0, -0.5) * RotateY(180);
-    drawBuilding(position, vec3(2.5, 2.5, 2.0), 0, CSTONE);
+    //--- flat roof 1
+    model = grid_pos_matrix * Translate( 0.5, 2.535, 0.5 ) * Scale(2.0, 0.05, 4.0);
+    draw(model, CUBE, ROOF, 4.0);
+    
+    //---foundation 2
+    model = grid_pos_matrix * Translate( -1.75, 0.01, -0.5 ) * Scale(2.5, 0.01, 2.1);
+    draw(model, CUBE, CEMENT, 4.0);
+    
+    //--- middle building 2
+    position = grid_pos_matrix * Translate(-1.75, 1.26, -0.5) * Scale(2.5, 2.5, 2.0);
+    draw(position, CUBE, HOTEL, 4.0);
+    
+    //--- flat roof 2
+    model = grid_pos_matrix * Translate( -1.75, 2.535, -0.5 ) * Scale(2.5, 0.05, 2.0);
+    draw(model, CUBE, ROOF, 4.0);
     
     //---foundation 3
     model = grid_pos_matrix * Translate( -4.0, 0.01, 0.5 ) * Scale(2.1, 0.01, 4.1);
     draw(model, CUBE, CEMENT, 4.0);
     
     //--- brick building 3
-    model = grid_pos_matrix * Translate( -4.0, 1.251, 0.5 ) * Scale(2.0, 2.5, 4.0);
-    draw(model, CUBE, BRICK2, 4.0);
+    model = grid_pos_matrix * Translate( -4.0, 1.26, 0.5 ) * Scale(2.0, 2.5, 4.0);
+    draw(model, CUBE, HOTEL, 4.0);
+    
+    //--- flat roof 3
+    model = grid_pos_matrix * Translate( -4.0, 2.535, 0.5 ) * Scale(2.0, 0.05, 4.0);
+    draw(model, CUBE, ROOF, 4.0);
 }
 
 void grid9(mat4 grid_pos_matrix)
@@ -1557,7 +1577,7 @@ void grid16(mat4 grid_pos_matrix)
     draw(model, CUBE, CEMENT, 4.0);
     
     //--- brick building 1
-    model = grid_pos_matrix * Translate( -3.5, 1.251, -1.75 ) * Scale(3.0, 2.5, 6.5);
+    model = grid_pos_matrix * Translate( -3.5, 1.26, -1.75 ) * Scale(3.0, 2.5, 6.5);
     draw(model, CUBE, BRICK2, 4.0);
     
     //---foundation 2
@@ -1565,7 +1585,7 @@ void grid16(mat4 grid_pos_matrix)
     draw(model, CUBE, CEMENT, 4.0);
     
     //--- brick building 2
-    model = grid_pos_matrix * Translate( 1.5, 1.251, -4.0 ) * Scale(7.0, 2.5, 2.0);
+    model = grid_pos_matrix * Translate( 1.5, 1.26, -4.0 ) * Scale(7.0, 2.5, 2.0);
     draw(model, CUBE, BRICK2, 4.0);
     /*
      //--- balcony
@@ -1773,6 +1793,14 @@ void grid20(mat4 grid_pos_matrix)
     draw(model, CUBE, SAND, 4.0);
 }
 
+//-----------CITY GRID---------
+//1------2------3------4-----17
+//5------6------7------8-----18
+//9-----10-----11-----12-----19
+//13----14-----15-----16-----20
+
+// Grid 11 = (0,0) = CENTER
+// 10 x 10 Grids
 void loadGrids()
 {
     grid1(Translate(20.0, 0.0, 20.0));
@@ -1803,26 +1831,15 @@ display( void )
     glActiveTexture( GL_TEXTURE0 );
     camera();
     
-    //-----------CITY GRID---------
-    //1------2------3------4-----17
-    //5------6------7------8-----18
-    //9-----10-----11-----12-----19
-    //13----14-----15-----16-----20
+    loadGrids();
     
-    // Grid 11 = (0,0) = CENTER
-    // 10 x 10 Grids
-    //loadGrids();
-    
-    grid11(Translate(-10.0, 0.0, 10.0));
-    grid8(Translate(0.0, 0.0, 0.0));
-    
-    // far side pole -3.15
-    
+    //grid11(Translate(-10.0, 0.0, 10.0));
+    //grid8(Translate(0.0, 0.0, 0.0));
     
     //---- sphere w/ cube map
-    /*
+    
      glActiveTexture( GL_TEXTURE1 );
-     glBindTexture( GL_TEXTURE_CUBE_MAP, textures[5] );
+     glBindTexture( GL_TEXTURE_CUBE_MAP, textures[14] );
      glUniform1i( glGetUniformLocation(program, "light_out"), false );
      glUniform1i( glGetUniformLocation(program, "texture_on"), true );
      glUniform1i( glGetUniformLocation(program, "cube_map_on"), true );
@@ -1830,7 +1847,7 @@ display( void )
      
      SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 2.0);
      
-     transform_bube = Translate( 0.0, 1.0, -1.0 ) * RotateY(180) * Scale(4.0, 4.0, 4.0);
+     mat4 transform_bube = Translate( 0.0, 1.0, -1.0 ) * RotateY(180) * Scale(80.0, 80.0, 80.0);
      glUniformMatrix4fv( glGetUniformLocation( program, "model" ), 1, GL_TRUE, transform_bube );
      
      glVertexAttribPointer( vPosition, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(SPHERE_OFFSET) );
@@ -1839,7 +1856,6 @@ display( void )
      glDrawArrays( GL_TRIANGLES, 0, NumVerticesSphere );
      glUniform1i( glGetUniformLocation(program, "texture_on"), false );
      glUniform1i( glGetUniformLocation(program, "cube_map_on"), false );
-     */
     
     glutSwapBuffers();
 }
