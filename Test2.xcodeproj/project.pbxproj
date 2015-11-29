@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		6549B2BE1BF11B7800751B0D /* loadBMP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6549B2BC1BF11B7800751B0D /* loadBMP.cpp */; settings = {ASSET_TAGS = (); }; };
+		6549B2BE1BF11B7800751B0D /* loadBMP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6549B2BC1BF11B7800751B0D /* loadBMP.cpp */; };
 		65555CFA1B9764D800F8FA34 /* example1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 65555CF41B9764D800F8FA34 /* example1.cpp */; };
 		65555CFB1B9764D800F8FA34 /* InitShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 65555CF61B9764D800F8FA34 /* InitShader.cpp */; };
 		65555CFD1B97656C00F8FA34 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65555CFC1B97656C00F8FA34 /* OpenGL.framework */; };
@@ -39,14 +39,6 @@
 		65555CF91B9764D800F8FA34 /* vshader_lt.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = vshader_lt.glsl; path = Test2source/vshader_lt.glsl; sourceTree = SOURCE_ROOT; };
 		65555CFC1B97656C00F8FA34 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		65555CFE1B97657300F8FA34 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
-		65D8B2301BF1A1B20037A04A /* Asphalt.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = Asphalt.bmp; sourceTree = "<group>"; };
-		65D8B2311BF1A1B20037A04A /* Brick1.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = Brick1.bmp; sourceTree = "<group>"; };
-		65D8B2321BF1A1B20037A04A /* Brick2.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = Brick2.bmp; sourceTree = "<group>"; };
-		65D8B2331BF1A1B20037A04A /* Brick3.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = Brick3.bmp; sourceTree = "<group>"; };
-		65D8B2341BF1A1B20037A04A /* Building1.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = Building1.bmp; sourceTree = "<group>"; };
-		65D8B2351BF1A1B20037A04A /* Grass1.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = Grass1.bmp; sourceTree = "<group>"; };
-		65D8B2361BF1A1B20037A04A /* Sky.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = Sky.bmp; sourceTree = "<group>"; };
-		65D8B2371BF1A1B20037A04A /* Water.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = Water.bmp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,14 +75,6 @@
 		65555CEA1B97644500F8FA34 /* Test2 */ = {
 			isa = PBXGroup;
 			children = (
-				65D8B2301BF1A1B20037A04A /* Asphalt.bmp */,
-				65D8B2311BF1A1B20037A04A /* Brick1.bmp */,
-				65D8B2321BF1A1B20037A04A /* Brick2.bmp */,
-				65D8B2331BF1A1B20037A04A /* Brick3.bmp */,
-				65D8B2341BF1A1B20037A04A /* Building1.bmp */,
-				65D8B2351BF1A1B20037A04A /* Grass1.bmp */,
-				65D8B2361BF1A1B20037A04A /* Sky.bmp */,
-				65D8B2371BF1A1B20037A04A /* Water.bmp */,
 				65555CF21B9764D800F8FA34 /* Angel.h */,
 				65555CF31B9764D800F8FA34 /* CheckError.h */,
 				65555CF41B9764D800F8FA34 /* example1.cpp */,
