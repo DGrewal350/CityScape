@@ -27,7 +27,7 @@ enum { Xaxis = 0, Yaxis = 1, Zaxis = 2, NumAxes = 3 };
 int      Axis = Zaxis;
 GLfloat  Theta1[NumAxes] = { 0.0, 90.0, 90.0 };
 
-float r = 8.0;
+float r = 28.0;
 
 mat4 view_matrix, default_view_matrix;
 mat4 proj_matrix;
@@ -156,21 +156,6 @@ colortri()
     quad_tri( 5, 4, 0, 1 );
     sing_tri( 5, 1, 2);
     sing_tri(3, 0, 4);
-    /*
-    vec4 u = tri_vertices[2] - tri_vertices[1];
-    vec4 v = tri_vertices[5] - tri_vertices[2];
-    vec3 normal = normalize( cross(u,v) );
-    tnormals[Index] = normal; points_tri[Index] = tri_vertices[1]; Index++;
-    tnormals[Index] = normal; points_tri[Index] = tri_vertices[2]; Index++;
-    tnormals[Index] = normal; points_tri[Index] = tri_vertices[5]; Index++;
-    
-    u = tri_vertices[3] - tri_vertices[0];
-    v = tri_vertices[4] - tri_vertices[3];
-    normal = normalize( cross(u,v) );
-    tnormals[Index] = normal; points_tri[Index] = tri_vertices[0]; Index++;
-    tnormals[Index] = normal; points_tri[Index] = tri_vertices[3]; Index++;
-    tnormals[Index] = normal; points_tri[Index] = tri_vertices[4]; Index++;
-     */
 }
 
 //---- cylinder model
@@ -450,7 +435,7 @@ GLuint vColor;
 GLuint vNormal;
 GLuint vTexCoord;
 
-GLuint textures[16];
+GLuint textures[17];
 
 
 size_t CUBE_OFFSET;
@@ -483,7 +468,7 @@ init()
     colortri();
     
     //---- Initialize texture objects
-    glGenTextures(16, textures);
+    glGenTextures(17, textures);
     
     glActiveTexture( GL_TEXTURE0 );
     
@@ -643,8 +628,29 @@ init()
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
     
-    //---- cube maps
+    unsigned char* pic15 = NULL;
+    loadBMP_custom(&pic15, &w, &h, "Sky.bmp");
     
+    glBindTexture(GL_TEXTURE_2D, textures[14]);
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_BGR, GL_UNSIGNED_BYTE, pic15 );
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    
+    unsigned char* pic16 = NULL;
+    loadBMP_custom(&pic16, &w, &h, "Water.bmp");
+    
+    glBindTexture(GL_TEXTURE_2D, textures[15]);
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_BGR, GL_UNSIGNED_BYTE, pic16 );
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    /*
+    //---- cube maps
     unsigned char* negx_s = NULL;
     loadBMP_custom(&negx_s, &w, &h, "negx_s.bmp");
     unsigned char* negy_s = NULL;
@@ -659,7 +665,7 @@ init()
     loadBMP_custom(&posz_s, &w, &h, "posz_s.bmp");
     
     glActiveTexture( GL_TEXTURE1 );
-    glBindTexture( GL_TEXTURE_CUBE_MAP, textures[14] );
+    glBindTexture( GL_TEXTURE_CUBE_MAP, textures[16] );
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGB, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, posx_s);
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGB, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, posy_s);
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGB, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, posz_s);
@@ -671,7 +677,7 @@ init()
     glTexParameterf( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_REPEAT );
     glTexParameterf( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     glTexParameterf( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-    
+    */
     //---------------------------------------------------------------------
     
     //----set offset variables
@@ -785,7 +791,7 @@ SetLight( vec4 lpos, vec4 la, vec4 ld, vec4 ls )
 
 //----------------------------------------------------------------------------
 enum Shape { CUBE, CYL, SPHERE, TRI };
-enum Texture { GRASS, BRICK, ASPHAULT, CEMENT, WOOD, BRICK2, BOARDS, SAND, ROOF, STONE, STONE2, CSTONE, BRICK3, HOTEL };
+enum Texture { GRASS, BRICK, ASPHAULT, CEMENT, WOOD, BRICK2, BOARDS, SAND, ROOF, STONE, STONE2, CSTONE, BRICK3, HOTEL, SKY, WATER };
 
 void drawObject(mat4 model, size_t offset, size_t n_offset, int numVertices)
 {
@@ -860,22 +866,13 @@ void drawBuilding(mat4 position, vec3 size, float doorOffset, Texture texture)
     draw(model, CUBE, texture, 4.0);
     
     //--- door
-    model = position * Translate(doorOffset, 0.31 , -size.z/2) * Scale(0.3, 0.6, 0.01);
+    model = position * Translate(doorOffset, 0.41 , -size.z/2) * Scale(0.4, 0.8, 0.01);
     draw(model, CUBE, WOOD, 4.0);
     
     vec3 roof_size = vec3(size.x, 0.1, size.z + 0.1);
     
     model = position * Translate(0.0, roof_size.y/2 + size.y + 0.01, 0.0) * Scale(roof_size) * RotateY(90) * RotateX(90);
     draw(model, TRI, ROOF, 4.0);
-    /*
-    //--- Roof 1
-    model = position * Translate(0.0, roof_size.y/2 + size.y + 0.01, roof_size.z/2 ) * RotateX(2.5) * Scale(roof_size) * RotateY(90);
-    draw(model, CUBE, ROOF, 4.0);
-    
-    //--- Roof 1
-    model = position * Translate(0.0, roof_size.y/2 + size.y + 0.01, -roof_size.z/2 ) * RotateX(-2.5) * Scale(roof_size) * RotateY(90);
-    draw(model, CUBE, ROOF, 4.0);
-     */
 }
 
 void drawRoad(mat4 position, float length)
@@ -893,11 +890,53 @@ void drawRoad(mat4 position, float length)
     //--- road 1 -right sidewalk 1
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
     model = position * Translate( 0.0, 0.015, 1.5) * Scale(length, 0.04, 0.5);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
     
     //--- road 1 -left sidewalk 2
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
     model = position * Translate( 0.0, 0.015, -1.5) * Scale(length, 0.04, 0.5);
+    draw(model, CUBE, CEMENT, 4.0);
+}
+
+void drawFreeway(mat4 position, float length)
+{
+    //---- road
+    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
+    mat4 model = position * Scale(10.0, 0.01, length);
+    draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //---- center divider
+    model = position * Translate(0.0, 0.21, 0.0) * Scale( 0.1, 0.4, length);
+    draw(model, CUBE, CEMENT, 4.0);
+    
+    //---- lane line 1
+    SetMaterial( vec4(1.0,1.0,0.0,1.0), vec4(1.0,1.0,0.0,1.0), vec4(1.0,1.0,0.0,1.0), 10.0);
+    model = position * Translate(1.25, 0.0105, 0.0) * Scale(0.125, 0.001, length);
+    draw(model, CUBE);
+    
+    //---- lane line 2
+    SetMaterial( vec4(1.0,1.0,0.0,1.0), vec4(1.0,1.0,0.0,1.0), vec4(1.0,1.0,0.0,1.0), 10.0);
+    model = position * Translate(-1.25, 0.0105, 0.0) * Scale(0.125, 0.001, length);
+    draw(model, CUBE);
+    
+    //---- lane line 3
+    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 10.0);
+    model = position * Translate(2.5, 0.0105, 0.0) * Scale(0.125, 0.001, length);
+    draw(model, CUBE);
+    
+    //---- lane line 4
+    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 10.0);
+    model = position * Translate(-2.5, 0.0105, 0.0) * Scale(0.125, 0.001, length);
+    draw(model, CUBE);
+    
+    //---- lane line 5
+    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 10.0);
+    model = position * Translate(3.75, 0.0105, 0.0) * Scale(0.125, 0.001, length);
+    draw(model, CUBE);
+    
+    //---- lane line 6
+    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 10.0);
+    model = position * Translate(-3.75, 0.0105, 0.0) * Scale(0.125, 0.001, length);
     draw(model, CUBE);
 }
 
@@ -914,17 +953,17 @@ void drawParkingStruct(mat4 position, vec3 size)
     //--- corner pillars
     SetMaterial(vec4(0.9, 0.9, 0.9, 1.0), vec4(0.9, 0.9, 0.9, 1.0), vec4(0.9, 0.9, 0.9, 1.0), 5.0);
     model = position * Translate( size.x/2-pillarSize.x/2, pillarSize.y/2+0.01, size.z/2-pillarSize.z/2 ) * Scale(pillarSize);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
     model = position * Translate( -(size.x/2-pillarSize.x/2), pillarSize.y/2+0.01, size.z/2-pillarSize.z/2 ) * Scale(pillarSize);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
     model = position * Translate( size.x/2-pillarSize.x/2, pillarSize.y/2+0.01, -(size.z/2-pillarSize.z/2) ) * Scale(pillarSize);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
     model = position * Translate( -(size.x/2-pillarSize.x/2), pillarSize.y/2+0.01, -(size.z/2-pillarSize.z/2) ) * Scale(pillarSize);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
     
     for (int i = 0; i < num_levels; i++) {
         model = position * Translate(0.0, ((pillarSize.x*2*i)+(pillarSize.x/2+0.01)), 0.0) * Scale(size.x, pillarSize.x, size.z);
-        draw(model, CUBE);
+        draw(model, CUBE, CEMENT, 4.0);
     }
 }
 
@@ -960,7 +999,7 @@ void camera()
     float bottom = -1.0;
     float top = 1.0;
     float zNear = 1.0;
-    float zFar = 30.0;
+    float zFar = 100.0;
     
     proj_matrix = Frustum( left, right, bottom, top, zNear, zFar );
     GLuint proj = glGetUniformLocation( program, "projection" );
@@ -987,17 +1026,11 @@ void camera()
 
 void grid1(mat4 grid_pos_matrix)
 {
-    //---- freeway road
-    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
-    mat4 model = grid_pos_matrix * Translate(0.0, 0.0, -0.75) * Scale(10.0, 0.01, 8.5);
-    draw(model, CUBE, ASPHAULT, 4.0);
+    //---- freeway
+    drawFreeway(grid_pos_matrix, 10.0);
     
-    //---- center divider
-    model = grid_pos_matrix * Translate(0.0, 0.21, -0.75) * Scale( 0.1, 0.4, 8.5);
-    draw(model, CUBE, CEMENT, 4.0);
-    
-    // left wall
-    model = grid_pos_matrix * Translate(4.95, 0.51, -0.75) * Scale( 0.05, 1.0, 8.5);
+    //---- left wall
+    mat4 model = grid_pos_matrix * Translate(4.95, 0.51, -0.75) * Scale( 0.05, 1.0, 8.5);
     draw(model, CUBE, CEMENT, 4.0);
     
     //---- right fence
@@ -1007,111 +1040,173 @@ void grid1(mat4 grid_pos_matrix)
 
 void grid2(mat4 grid_pos_matrix)
 {
-    //---- Grass
-    mat4 model = grid_pos_matrix * Translate(-3.0, 0.0, -2.5) * Scale(4.0, 0.01, 5.0);
-    draw(model, CUBE, GRASS, 4.0);
+    //---- lamp post 1
+    vec3 light_position = vec3(3.5, 0.0, 0.35);
+    drawLamp(light_position, grid_pos_matrix);
     
     //---- asphalt piece
     SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
-    model = grid_pos_matrix * Translate(2.0, 0.0, -2.5) * Scale(6.0, 0.01, 5.0);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
+    mat4 model = grid_pos_matrix * Translate(2.0, 0.0, -2.5) * Scale(6.0, 0.01, 5.0);
     draw(model, CUBE, ASPHAULT, 4.0);
     
     //---- Road
     mat4 position = grid_pos_matrix * Translate(-2.125, 0.0, 1.75);
     drawRoad(position, 5.75);
     
+    //---- asphalt piece
+    model = grid_pos_matrix * Translate(0.0, 0.0, 4.25) * Scale(10.0, 0.01, 1.5);
+    draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //---- Store 1
+    position = grid_pos_matrix * Translate(3.5, 0.0, 4.25);
+    drawBuilding(position, vec3(3.0, 1.25, 1.5), 0, STONE);
+    
+    //---- Store 2
+    position = grid_pos_matrix * Translate(-3.5, 0.0, 4.25);
+    drawBuilding(position, vec3(3.0, 1.25, 1.5), 0, CSTONE);
+    
+    //---- Store 3
+    position = grid_pos_matrix * Translate(2.0, 0.0, -3.75) * RotateY(180);
+    drawBuilding(position, vec3(6.0, 1.25, 2.5), 0, BRICK);
+    
+    //---- lamp post 1
+    light_position = vec3(-1.5, 0.0, 0.35);
+    drawLamp(light_position, grid_pos_matrix);
+    
     //---- driveway/road
     SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
     model = grid_pos_matrix * Translate(2.0, 0.0, 1.5) * Scale(2.5, 0.01, 3.0);
     draw(model, CUBE, ASPHAULT, 4.0);
     
     //--- road 2 - sidewalk finish
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
     model = grid_pos_matrix * Translate( 2.0, 0.015, 3.25) * Scale(2.5, 0.04, 0.5);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
     
     //---- Road finish
     position = grid_pos_matrix * Translate(4.125, 0.0, 1.75);
     drawRoad(position, 1.75);
     
-    //---- Store
-    position = grid_pos_matrix * Translate(2.0, 0.0, -3.75) * RotateY(180);
-    drawBuilding(position, vec3(6.0, 1.25, 2.5), 0, BRICK);
-    
     //---- side fence
     model = grid_pos_matrix * Translate(-0.975, 0.21, -1.25) * Scale( 0.05, 0.4, 2.5);
     draw(model, CUBE, CEMENT, 4.0);
+    
+    //---- Grass
+    SetMaterial( vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), 0.5);
+    model = grid_pos_matrix * Translate(-3.0, 0.0, -2.5) * Scale(4.0, 0.01, 5.0);
+    draw(model, CUBE, GRASS, 4.0);
 }
 
 void grid3(mat4 grid_pos_matrix)
 {
-    //---- Grass
+    //---- lamp post 1
+    vec3 light_position = vec3(2.5, 0.0, 0.35);
+    drawLamp(light_position, grid_pos_matrix);
+    
+    //---- Grass (lower)
+    SetMaterial( vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), 0.5);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
     mat4 model = grid_pos_matrix * Translate(0.0, 0.0, -2.5) * Scale(10.0, 0.01, 5.0);
     draw(model, CUBE, GRASS, 4.0);
+    
+    //---- Grass (upper)
+    model = grid_pos_matrix * Translate(0.0, 0.0, 4.25) * Scale(10.0, 0.01, 1.5);
+    draw(model, CUBE, GRASS, 4.0);
+    
+    //---- Store 1
+    mat4 position = grid_pos_matrix * Translate(3.0, 0.0, 4.25);
+    drawBuilding(position, vec3(4.0, 1.25, 1.5), 0, BRICK2);
+    
+    //---- Store 2
+    position = grid_pos_matrix * Translate(-3.0, 0.0, 4.25);
+    drawBuilding(position, vec3(4.0, 1.25, 1.5), 0, STONE2);
     
     //---- Sidewalk
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
     model = grid_pos_matrix * Translate( 0.0, 0.015, -2.5) * Scale(0.5, 0.04, 5.0);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
     
     //---- Road
-    mat4 position = grid_pos_matrix * Translate(0.0, 0.0, 1.75);
+    position = grid_pos_matrix * Translate(0.0, 0.0, 1.75);
     drawRoad(position, 10.0);
+    
+    //---- lamp post 2
+    light_position = vec3(-2.5, 0.0, 0.35);
+    drawLamp(light_position, grid_pos_matrix);
 }
 
 void grid4(mat4 grid_pos_matrix)
 {
-    //---- Road 1
-    //--- Road 1 (verticle lower part)
-    mat4 position = grid_pos_matrix * Translate(3.25, 0.0, -2.25) * RotateY(90);
-    drawRoad(position, 5.5);
+    //---- lamp post 1
+    vec3 light_position = vec3(0.5, 0.0, 0.35);
+    drawLamp(light_position, grid_pos_matrix);
     
+    //---- Road 1
     //--- Road 1 (crossroad)
     SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
     mat4 model = grid_pos_matrix * Translate(3.25, 0.0, 1.75) * Scale(3.5, 0.01, 2.5);
     draw(model, CUBE, ASPHAULT, 4.0);
     
     //--- Road 1 (verticle upper part)
-    position = grid_pos_matrix * Translate(3.25, 0.0, 3.25) * RotateY(90);
-    drawRoad(position, 0.5);
-    /*
-    //--- Road 1 (verticle upper part)
-    position = grid_pos_matrix * Translate(3.25, 0.0, 4.0) * RotateY(90);
+    mat4 position = grid_pos_matrix * Translate(3.25, 0.0, 4.0) * RotateY(90);
     drawRoad(position, 2.0);
-     */
     
     //---- Road 2 (horizontal)
     position = grid_pos_matrix * Translate(-1.75, 0.0, 1.75);
     drawRoad(position, 6.5);
     
-    //---- asphault piece
+    //---- asphalt piece (upper)
     SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
+    model = grid_pos_matrix * Translate(-1.75, 0.0, 4.25) * Scale(6.5, 0.01, 1.5);
+    draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //---- Building 1 (top)
+    position = grid_pos_matrix * Translate(0.25, 0.0, 4.25);
+    drawBuilding(position, vec3(3.5, 1.25, 1.5), 0, BRICK3);
+    
+    //---- asphault piece (lower)
     model = grid_pos_matrix * Translate(-1.75, 0.0, -2.5) * Scale(6.5, 0.01, 5.0);
     draw(model, CUBE, ASPHAULT, 4.0);
     
-    //---- Building 1
+    //---- Building 2
     position = grid_pos_matrix * Translate(0.0, 0.0, -1.875);
     drawBuilding(position, vec3(3.0, 1.25, 3.75), 0, STONE);
     
-    //---- Building 2
+    //---- lamp post 1
+    light_position = vec3(-3.5, 0.0, 0.35);
+    drawLamp(light_position, grid_pos_matrix);
+    
+    //---- Building 3
+    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
     position = grid_pos_matrix * Translate(-3.5, 0.0, -1.875);
     drawBuilding(position, vec3(3.0, 2.5, 3.75), 0, BRICK2);
+    
+    //---- lamp post 1
+    light_position = vec3(1.85, 0.0, -2.25);
+    drawLamp(light_position, grid_pos_matrix);
+    
+    //--- Road 1 (verticle lower part)
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
+    position = grid_pos_matrix * Translate(3.25, 0.0, -2.25) * RotateY(90);
+    drawRoad(position, 5.5);
+    
+    //---- lamp post 1
+    light_position = vec3(4.65, 0.0, -2.25);
+    drawLamp(light_position, grid_pos_matrix);
     
 }
 
 void grid5(mat4 grid_pos_matrix)
 {
-    //---- freeway road
-    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
-    mat4 model = grid_pos_matrix * Scale(10.0, 0.01, 10.0);
-    draw(model, CUBE, ASPHAULT, 4.0);
-    
-    //---- center divider
-    model = grid_pos_matrix * Translate(0.0, 0.21, 0.0) * Scale( 0.1, 0.4, 10.0);
-    draw(model, CUBE, CEMENT, 4.0);
+    //---- freeway
+    drawFreeway(grid_pos_matrix, 10.0);
     
     // left wall
-    model = grid_pos_matrix * Translate(4.95, 0.51, 0.0) * Scale( 0.05, 1.0, 10.0);
+    mat4 model = grid_pos_matrix * Translate(4.95, 0.51, 0.0) * Scale( 0.05, 1.0, 10.0);
     draw(model, CUBE, CEMENT, 4.0);
     
     //---- right fence
@@ -1121,28 +1216,35 @@ void grid5(mat4 grid_pos_matrix)
 
 void grid6(mat4 grid_pos_matrix)
 {
+    //---- lamp post 1
+    vec3 light_position = vec3(2.0, 0.0, -1.85);
+    drawLamp(light_position, grid_pos_matrix);
+    
+    //---- cross road
+    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
+    mat4 model = grid_pos_matrix * Translate(-3.25, 0.0, -3.25) * Scale(3.5, 0.01, 2.5);
+    draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //--- road 2 - sidewalk finish
+    SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
+    model = grid_pos_matrix * Translate( -3.25, 0.015, -1.75) * Scale(3.5, 0.04, 0.5);
+    draw(model, CUBE, CEMENT, 4.0);
+    
     //---- Road 1
-    //--- Road 1 (right piece)
-    mat4 position = grid_pos_matrix * Translate(-3.0, 0.0, -3.25);
-    drawRoad(position, 4.0);
+    //--- Road 1 (left piece)
+    mat4 position = grid_pos_matrix * Translate(-1.25, 0.0, -3.25);
+    drawRoad(position, 0.5);
     
     //---- driveway/road
     SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
-    mat4 model = grid_pos_matrix * Translate(0.25, 0.0, -3.0) * Scale(2.5, 0.01, 3.0);
+    model = grid_pos_matrix * Translate(0.25, 0.0, -3.0) * Scale(2.5, 0.01, 3.0);
     draw(model, CUBE, ASPHAULT, 4.0);
     
     //--- road 2 - sidewalk finish
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
     model = grid_pos_matrix * Translate( 0.25, 0.015, -4.75) * Scale(2.5, 0.04, 0.5);
-    draw(model, CUBE);
-    
-    //--- Road 1 (left piece)
-    position = grid_pos_matrix * Translate(3.25, 0.0, -3.25);
-    drawRoad(position, 3.5);
-    
-    //---- Grass
-    model = grid_pos_matrix * Translate(-3.0, 0.0, 1.75) * Scale(4.0, 0.01, 6.5);
-    draw(model, CUBE, GRASS, 4.0);
+    draw(model, CUBE, CEMENT, 4.0);
     
     //---- parking lot piece 1
     SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
@@ -1150,7 +1252,6 @@ void grid6(mat4 grid_pos_matrix)
     draw(model, CUBE, ASPHAULT, 4.0);
     
     //---- parking lot piece 2
-    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
     model = grid_pos_matrix * Translate(-0.125, 0.0, -0.875) * Scale(1.75, 0.01, 1.25);
     draw(model, CUBE, ASPHAULT, 4.0);
     
@@ -1204,6 +1305,20 @@ void grid6(mat4 grid_pos_matrix)
     model = grid_pos_matrix * Translate( 4.75, 3.425, -1.75) * Scale( 1.25, 0.75, 0.15);
     draw(model, CUBE);
     
+    //---- lamp post 2
+    light_position = vec3(-2.5, 0.0, -1.85);
+    drawLamp(light_position, grid_pos_matrix);
+    
+    //---- Grass
+    SetMaterial( vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), 0.5);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
+    model = grid_pos_matrix * Translate(-3.0, 0.0, 1.75) * Scale(4.0, 0.01, 6.5);
+    draw(model, CUBE, GRASS, 4.0);
+    
+    //--- Road 1 (right piece)
+    position = grid_pos_matrix * Translate(3.25, 0.0, -3.25);
+    drawRoad(position, 3.5);
+    
     //---- side fence
     model = grid_pos_matrix * Translate(-1.0, 0.21, 1.75) * Scale( 0.05, 0.4, 6.5);
     draw(model, CUBE, CEMENT, 4.0);
@@ -1211,11 +1326,17 @@ void grid6(mat4 grid_pos_matrix)
 
 void grid7(mat4 grid_pos_matrix)
 {
+    //---- lamp post 1
+    vec3 light_position = vec3(2.5, 0.0, -1.85);
+    drawLamp(light_position, grid_pos_matrix);
+    
     //---- Road
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
     mat4 position = grid_pos_matrix * Translate(-0.25, 0.0, -3.25);
     drawRoad(position, 10.5);
     
     //---- Grass
+    SetMaterial( vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), 0.5);
     mat4 model = grid_pos_matrix * Translate(0.0, 0.0, 1.75) * Scale(10.0, 0.01, 6.5);
     draw(model, CUBE, GRASS, 4.0);
     
@@ -1237,17 +1358,26 @@ void grid7(mat4 grid_pos_matrix)
     //--- sidewalk 1
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
     model = grid_pos_matrix * Translate( 0.0, 0.015, 4.25) * Scale(10.0, 0.04, 0.5);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
     
     //--- sidewalk 2
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
     model = grid_pos_matrix * Translate( 0.0, 0.015, 1.75) * Scale(0.5, 0.04, 6.5);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
+    
+    //---- lamp post 2
+    light_position = vec3(-2.5, 0.0, -1.85);
+    drawLamp(light_position, grid_pos_matrix);
 }
 
 void grid8(mat4 grid_pos_matrix)
 {
+    //---- lamp post 1
+    vec3 light_position = vec3(1.0, 0.0, -1.85);
+    drawLamp(light_position, grid_pos_matrix);
+    
     //---- road 1 (bottom)
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
     mat4 position = grid_pos_matrix * Translate(-1.5, 0.0, -3.25);
     drawRoad(position, 7.0);
     
@@ -1260,11 +1390,6 @@ void grid8(mat4 grid_pos_matrix)
     position = grid_pos_matrix * Translate(3.25, 0.0, 0.5) * RotateY(90);
     drawRoad(position, 4.0);
     
-    //---- asphalt piece
-    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
-    model = grid_pos_matrix * Translate(-1.75, 0.0, 1.75) * Scale(6.5, 0.01, 6.5);
-    draw(model, CUBE, ASPHAULT, 4.0);
-    
     //---- driveway/road
     SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
     model = grid_pos_matrix * Translate(3.0, 0.0, 3.75) * Scale(3.0, 0.01, 2.5);
@@ -1273,10 +1398,16 @@ void grid8(mat4 grid_pos_matrix)
     //--- road 2 - sidewalk finish
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
     model = grid_pos_matrix * Translate( 4.75, 0.015, 3.75) * Scale(0.5, 0.04, 2.5);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
+    
+    //---- lamp post 1
+    light_position = vec3(-3.5, 0.0, -1.85);
+    drawLamp(light_position, grid_pos_matrix);
     
     //----building ( 3 in 1) w/ flat roof
     //---foundation 1
+    SetMaterial( vec4(1.0, 1.0, 1.0, 1.0), vec4(1.0, 1.0, 1.0, 1.0), vec4(1.0, 1.0, 1.0, 1.0), 5.0);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
     model = grid_pos_matrix * Translate( 0.5, 0.01, 0.5 ) * Scale(2.1, 0.01, 4.1);
     draw(model, CUBE, CEMENT, 4.0);
     
@@ -1311,26 +1442,51 @@ void grid8(mat4 grid_pos_matrix)
     //--- flat roof 3
     model = grid_pos_matrix * Translate( -4.0, 2.535, 0.5 ) * Scale(2.0, 0.05, 4.0);
     draw(model, CUBE, ROOF, 4.0);
+    
+    //---- lamp post 1
+    light_position = vec3(1.85, 0.0, -0.75);
+    drawLamp(light_position, grid_pos_matrix);
+    
+    //---- lamp post 1
+    light_position = vec3(4.65, 0.0, 2.);
+    drawLamp(light_position, grid_pos_matrix);
+    
+    //---- asphalt piece
+    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
+    model = grid_pos_matrix * Translate(-1.75, 0.0, 1.75) * Scale(6.5, 0.01, 6.5);
+    draw(model, CUBE, ASPHAULT, 4.0);
 }
 
 void grid9(mat4 grid_pos_matrix)
 {
-    //---- freeway road
-    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
-    mat4 model = grid_pos_matrix * Scale(10.0, 0.01, 10.0);
-    draw(model, CUBE, ASPHAULT, 4.0);
-    
-    //---- center divider
-    model = grid_pos_matrix * Translate(0.0, 0.21, 0.0) * Scale( 0.1, 0.4, 10.0);
-    draw(model, CUBE, CEMENT, 4.0);
+    //---- freeway
+    drawFreeway(grid_pos_matrix, 10.0);
     
     // left wall
-    model = grid_pos_matrix * Translate(4.95, 0.51, 0.0) * Scale( 0.05, 1.0, 10.0);
+    mat4 model = grid_pos_matrix * Translate(4.95, 0.51, 0.0) * Scale( 0.05, 1.0, 10.0);
     draw(model, CUBE, CEMENT, 4.0);
     
     //---- right fence
-    model = grid_pos_matrix * Translate(-4.95, 0.21, -0.625) * Scale( 0.05, 0.4, 2.75);
+    model = grid_pos_matrix * Translate(-4.95, 0.21, 0.0) * Scale( 0.05, 0.4, 11.0);
     draw(model, CUBE, CEMENT, 4.0);
+}
+
+void grid10(mat4 grid_pos_matrix)
+{
+    //---- lamp post 1
+    vec3 light_position = vec3(-1.85, 0.0, 0.0);
+    drawLamp(light_position, grid_pos_matrix);
+    
+    //---- road 1
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
+    mat4 position = grid_pos_matrix * Translate(-3.25, 0.0, 0.25) * RotateY(90);
+    drawRoad(position, 10.5);
+    
+    //---- Grass
+    SetMaterial( vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), 0.5);
+    mat4 model = grid_pos_matrix * Translate(1.75, 0.0, 0.0) * Scale(6.5, 0.01, 10.0);
+    draw(model, CUBE, GRASS, 4.0);
 }
 
 void grid11(mat4 grid_pos_matrix)
@@ -1402,12 +1558,22 @@ void grid11(mat4 grid_pos_matrix)
     //--- entrance sidewalk
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
     model = grid_pos_matrix * Translate( 0.0, 0.01, 4.475) * Scale(3.0, 0.01, 1.05);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
 }
 
 void grid12(mat4 grid_pos_matrix)
 {
+    //---- lamp post 1
+    vec3 light_position = vec3(4.65, 0.0, 2.);
+    drawLamp(light_position, grid_pos_matrix);
+    
+    //---- lamp post 2
+    light_position = vec3(1.85, 0.0, -0.75);
+    drawLamp(light_position, grid_pos_matrix);
+    
     //---- grass 1
+    SetMaterial( vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), 0.5);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
     mat4 model = grid_pos_matrix * Translate( -1.75, 0.0, 0.0 ) * Scale(6.5, 0.01, 10.0);
     draw(model, CUBE, GRASS, 4.0);
     
@@ -1427,23 +1593,18 @@ void grid12(mat4 grid_pos_matrix)
     position = grid_pos_matrix * Translate(-4.25, 0.0, -3.75);
     drawBuilding(position, vec3(1.5, 2.5, 2.5), 0, BRICK3);
     
+    //---- parking structure
     position = grid_pos_matrix * Translate(-1.5, 0.0, 2.5);
     drawParkingStruct(position, vec3(6.0, 4.0, 5.0));
 }
 
 void grid13(mat4 grid_pos_matrix)
 {
-    //---- freeway road
-    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
-    mat4 model = grid_pos_matrix * Scale(10.0, 0.01, 10.0);
-    draw(model, CUBE, ASPHAULT, 4.0);
-    
-    //---- center divider
-    model = grid_pos_matrix * Translate(0.0, 0.21, 0.0) * Scale( 0.1, 0.4, 10.0);
-    draw(model, CUBE, CEMENT, 4.0);
+    //---- freeway
+    drawFreeway(grid_pos_matrix, 10.0);
     
     // left wall
-    model = grid_pos_matrix * Translate(4.95, 0.51, 0.0) * Scale( 0.05, 1.0, 10.0);
+    mat4 model = grid_pos_matrix * Translate(4.95, 0.51, 0.0) * Scale( 0.05, 1.0, 10.0);
     draw(model, CUBE, CEMENT, 4.0);
 }
 
@@ -1456,6 +1617,7 @@ void grid14(mat4 grid_pos_matrix)
     //---- Fountain
     //---- asphault circle
     SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
     mat4 transform_bube = grid_pos_matrix * Translate( -3.0, 0.0351, 3.25 ) * Scale(4.0, 0.01, 4.0);
     draw(transform_bube, SPHERE, ASPHAULT, 4.0);
     
@@ -1480,6 +1642,7 @@ void grid14(mat4 grid_pos_matrix)
     draw(transform_tube, CYL);
     
     //---- park 1
+    SetMaterial( vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), 0.5);
     mat4 model = grid_pos_matrix * Translate( 0.0, 0.0, -1.75 ) * Scale(10.0, 0.01, 6.5);
     draw(model, CUBE, GRASS, 4.0);
     
@@ -1500,6 +1663,7 @@ void grid15(mat4 grid_pos_matrix)
     
     //---- Road 1
     //--- Road 1 (left piece)
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
     mat4 position = grid_pos_matrix * Translate(3.125, 0.0, 3.25);
     drawRoad(position, 3.75);
     
@@ -1511,7 +1675,7 @@ void grid15(mat4 grid_pos_matrix)
     //--- Road 1 - sidewalk finish
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
     model = grid_pos_matrix * Translate( 0.0, 0.015, 4.75) * Scale(2.5, 0.04, 0.5);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
     
     //--- Road 1 (right piece)
     position = grid_pos_matrix * Translate(-3.125, 0.0, 3.25);
@@ -1521,7 +1685,13 @@ void grid15(mat4 grid_pos_matrix)
     position = grid_pos_matrix * Translate(0.0, 0.0, -1.75) * RotateY(90);
     drawRoad(position, 6.5);
     
+    //---- lamp post 1
+    light_position = vec3(1.4, 0.0, 1.0);
+    drawLamp(light_position, grid_pos_matrix);
+    
     //---- park 1
+    SetMaterial( vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), 0.5);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
     model = grid_pos_matrix * Translate( 3.375, 0.0, -1.75 ) * Scale(3.25, 0.01, 6.5);
     draw(model, CUBE, GRASS, 4.0);
     
@@ -1529,12 +1699,21 @@ void grid15(mat4 grid_pos_matrix)
     SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
     model = grid_pos_matrix * Translate( -3.375, 0.0, -1.75 ) * Scale(3.25, 0.01, 6.5);
     draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //---- lamp post 1
+    light_position = vec3(1.4, 0.0, -4.0);
+    drawLamp(light_position, grid_pos_matrix);
 }
 
 void grid16(mat4 grid_pos_matrix)
 {
+    //---- lamp post 1
+    vec3 light_position = vec3(0.0, 0.0, 4.65);
+    drawLamp(light_position, grid_pos_matrix);
+    
     //---- parking lot driveway
     SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
     mat4 model = grid_pos_matrix * Translate( 2.5, 0.0, 3.0 ) * Scale(5.0, 0.01, 3.0);
     draw(model, CUBE, ASPHAULT, 4.0);
     
@@ -1569,7 +1748,7 @@ void grid16(mat4 grid_pos_matrix)
     //--- road 2 sidewalk finish
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
     model = grid_pos_matrix * Translate( 0.75, 0.015, 4.75) * Scale(1.5, 0.04, 0.5);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
     
     //----building 4 ( L Shaped)
     //---foundation 1
@@ -1580,6 +1759,10 @@ void grid16(mat4 grid_pos_matrix)
     model = grid_pos_matrix * Translate( -3.5, 1.26, -1.75 ) * Scale(3.0, 2.5, 6.5);
     draw(model, CUBE, BRICK2, 4.0);
     
+    //--- flat roof 1
+    model = grid_pos_matrix * Translate( -3.5, 2.535, -1.75 ) * Scale(3.0, 0.05, 6.5);
+    draw(model, CUBE, ROOF, 4.0);
+    
     //---foundation 2
     model = grid_pos_matrix * Translate( 1.5, 0.01, -4.0 ) * Scale(7.1, 0.01, 2.1);
     draw(model, CUBE, CEMENT, 4.0);
@@ -1587,6 +1770,14 @@ void grid16(mat4 grid_pos_matrix)
     //--- brick building 2
     model = grid_pos_matrix * Translate( 1.5, 1.26, -4.0 ) * Scale(7.0, 2.5, 2.0);
     draw(model, CUBE, BRICK2, 4.0);
+    
+    //--- flat roof 2
+    model = grid_pos_matrix * Translate( 1.5, 2.535, -4.0 ) * Scale(7.0, 0.05, 2.0);
+    draw(model, CUBE, ROOF, 4.0);
+    
+    //--- door
+    model = grid_pos_matrix * Translate(0.5, 0.41 , -3.0) * Scale(0.8, 0.8, 0.01);
+    draw(model, CUBE, WOOD, 4.0);
     /*
      //--- balcony
      model = Translate( -8.5, 0.626, -9.5 ) * Scale(7.0, 1.25, 3.0);
@@ -1596,10 +1787,20 @@ void grid16(mat4 grid_pos_matrix)
 
 void grid17(mat4 grid_pos_matrix)
 {
+    //---- lamp post 1
+    vec3 light_position = vec3(-1.9, 0.0, -1.0);
+    drawLamp(light_position, grid_pos_matrix);
+    
+    //---- Grass (top)
+    SetMaterial( vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), 0.5);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
+    mat4 model = grid_pos_matrix * Translate(2.25, 0.0, 4.25) * Scale(5.5, 0.01, 1.5);
+    draw(model, CUBE, GRASS, 4.0);
+    
     //--- sidewalk top piece
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
-    mat4 model = grid_pos_matrix * Translate( 2.25, 0.015, 3.25) * Scale(5.5, 0.04, 0.5);
-    draw(model, CUBE);
+    model = grid_pos_matrix * Translate( 2.25, 0.015, 3.25) * Scale(5.5, 0.04, 0.5);
+    draw(model, CUBE, CEMENT, 4.0);
     
     //---- road crossway (upper)
     SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
@@ -1609,7 +1810,7 @@ void grid17(mat4 grid_pos_matrix)
     //--- sidewalk side piece
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
     model = grid_pos_matrix * Translate( 1.75, 0.015, 1.75) * Scale(0.5, 0.04, 2.5);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
     
     //---- road
     mat4 position = grid_pos_matrix * Translate(3.25, 0.0, -1.0) * RotateY(90);
@@ -1623,7 +1824,7 @@ void grid17(mat4 grid_pos_matrix)
     //--- sidewalk side piece
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
     model = grid_pos_matrix * Translate( 1.75, 0.015, -3.75) * Scale(0.5, 0.04, 2.5);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
     
     //---- asphalt
     SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
@@ -1632,31 +1833,37 @@ void grid17(mat4 grid_pos_matrix)
     
     //---- shop 1
     position = grid_pos_matrix * Translate(0.5, 0.0, 1.5) * RotateY(90);
-    drawBuilding(position, vec3(3.0, 1.25, 2.0), 0, CSTONE);
+    drawBuilding(position, vec3(2.9, 1.25, 2.0), 0, CSTONE);
     
     //---- shop 2
     position = grid_pos_matrix * Translate(0.5, 0.0, -1.0) * RotateY(90);
-    drawBuilding(position, vec3(2.0, 1.25, 2.0), 0, STONE2);
+    drawBuilding(position, vec3(1.9, 1.25, 2.0), 0, STONE2);
     
     //---- shop 3
     position = grid_pos_matrix * Translate(0.5, 0.0, -3.75) * RotateY(90);
-    drawBuilding(position, vec3(2.5, 1.25, 2.0), 0, BRICK3);
+    drawBuilding(position, vec3(2.4, 1.25, 2.0), 0, BRICK3);
     
     //---- boardwalk
-    model = grid_pos_matrix * Translate(-1.25, 0.0, -0.75) * Scale(1.5, 0.01, 8.5);
+    SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 0.5);
+    model = grid_pos_matrix * Translate(-1.25, 0.0, 0.0) * Scale(1.5, 0.01, 10.0);
     draw(model, CUBE, BOARDS, 4.0);
     
     //---- beach
-    model = grid_pos_matrix * Translate(-3.5, 0.0, -0.75) * Scale(3.0, 0.01, 8.5);
+    model = grid_pos_matrix * Translate(-3.5, 0.0, 0.0) * Scale(3.0, 0.01, 10.0);
     draw(model, CUBE, SAND, 4.0);
 }
 
 void grid18(mat4 grid_pos_matrix)
 {
+    //---- lamp post 1
+    vec3 light_position = vec3(-1.9, 0.0, -1.0);
+    drawLamp(light_position, grid_pos_matrix);
+    
     //--- sidewalk side piece (upper)
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
     mat4 model = grid_pos_matrix * Translate( 1.75, 0.015, 3.75) * Scale(0.5, 0.04, 2.5);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
     
     //---- road crossway (upper)
     SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
@@ -1670,7 +1877,7 @@ void grid18(mat4 grid_pos_matrix)
     //--- sidewalk side piece (lower)
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
     model = grid_pos_matrix * Translate( 1.75, 0.015, -3.25) * Scale(0.5, 0.04, 2.5);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
     
     //---- road crossway (lower)
     SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
@@ -1688,21 +1895,22 @@ void grid18(mat4 grid_pos_matrix)
     
     //---- shop 1
     position = grid_pos_matrix * Translate(0.5, 0.0, 3.5) * RotateY(90);
-    drawBuilding(position, vec3(3.0, 1.25, 2.0), 0, BRICK3);
+    drawBuilding(position, vec3(2.9, 1.25, 2.0), 0, BRICK3);
     
     //---- shop 2
     position = grid_pos_matrix * Translate(0.5, 0.0, 0.75) * RotateY(90);
-    drawBuilding(position, vec3(2.5, 1.25, 2.0), 0, STONE2);
+    drawBuilding(position, vec3(2.4, 1.25, 2.0), 0, STONE2);
     
     //---- shop 3
     position = grid_pos_matrix * Translate(0.5, 0.0, -2.0) * RotateY(90);
-    drawBuilding(position, vec3(2.0, 1.25, 2.0), 0, STONE);
+    drawBuilding(position, vec3(1.9, 1.25, 2.0), 0, STONE);
     
     //---- shop 4
     position = grid_pos_matrix * Translate(0.5, 0.0, -4.0) * RotateY(90);
-    drawBuilding(position, vec3(2.0, 1.25, 2.0), 0, BRICK2);
+    drawBuilding(position, vec3(1.9, 1.25, 2.0), 0, BRICK2);
     
     //---- boardwalk
+    SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 0.5);
     model = grid_pos_matrix * Translate(-1.25, 0.0, 0.0) * Scale(1.5, 0.01, 10.0);
     draw(model, CUBE, BOARDS, 4.0);
     
@@ -1713,7 +1921,12 @@ void grid18(mat4 grid_pos_matrix)
 
 void grid19(mat4 grid_pos_matrix)
 {
+    //---- lamp post 1
+    vec3 light_position = vec3(-1.9, 0.0, -1.0);
+    drawLamp(light_position, grid_pos_matrix);
+    
     //---- road
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
     mat4 position = grid_pos_matrix * Translate(3.25, 0.0, -0.25) * RotateY(90);
     drawRoad(position, 10.5);
     
@@ -1724,21 +1937,22 @@ void grid19(mat4 grid_pos_matrix)
     
     //---- shop 1
     position = grid_pos_matrix * Translate(0.5, 0.0, 3.5) * RotateY(90);
-    drawBuilding(position, vec3(3.0, 1.25, 2.0), 0, STONE);
+    drawBuilding(position, vec3(2.9, 1.25, 2.0), 0, STONE);
     
     //---- shop 2
     position = grid_pos_matrix * Translate(0.5, 0.0, 1.0) * RotateY(90);
-    drawBuilding(position, vec3(2.0, 1.25, 2.0), 0, BRICK2);
+    drawBuilding(position, vec3(1.9, 1.25, 2.0), 0, BRICK2);
     
     //---- shop 3
     position = grid_pos_matrix * Translate(0.5, 0.0, -1.75) * RotateY(90);
-    drawBuilding(position, vec3(2.5, 1.25, 2.0), 0, STONE2);
+    drawBuilding(position, vec3(2.4, 1.25, 2.0), 0, STONE2);
     
     //---- shop 4
     position = grid_pos_matrix * Translate(0.5, 0.0, -4.0) * RotateY(90);
-    drawBuilding(position, vec3(2.0, 1.25, 2.0), 0, BRICK3);
+    drawBuilding(position, vec3(1.9, 1.25, 2.0), 0, BRICK3);
     
     //---- boardwalk
+    SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 0.5);
     model = grid_pos_matrix * Translate(-1.25, 0.0, 0.0) * Scale(1.5, 0.01, 10.0);
     draw(model, CUBE, BOARDS, 4.0);
     
@@ -1749,10 +1963,15 @@ void grid19(mat4 grid_pos_matrix)
 
 void grid20(mat4 grid_pos_matrix)
 {
+    //---- lamp post 1
+    vec3 light_position = vec3(-1.9, 0.0, -1.0);
+    drawLamp(light_position, grid_pos_matrix);
+
     //--- sidewalk side piece (upper)
     SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
     mat4 model = grid_pos_matrix * Translate( 1.75, 0.015, 3.25) * Scale(0.5, 0.04, 2.5);
-    draw(model, CUBE);
+    draw(model, CUBE, CEMENT, 4.0);
     
     //---- road crossway (upper)
     SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
@@ -1770,21 +1989,22 @@ void grid20(mat4 grid_pos_matrix)
     
     //---- shop 1
     position = grid_pos_matrix * Translate(0.5, 0.0, 3.25) * RotateY(90);
-    drawBuilding(position, vec3(3.5, 1.25, 2.0), 0, BRICK3);
+    drawBuilding(position, vec3(3.4, 1.25, 2.0), 0, BRICK3);
     
     //---- shop 2
     position = grid_pos_matrix * Translate(0.5, 0.0, 0.0) * RotateY(90);
-    drawBuilding(position, vec3(2.0, 1.25, 2.0), 0, STONE2);
+    drawBuilding(position, vec3(1.9, 1.25, 2.0), 0, STONE2);
     
     //---- shop 3
     position = grid_pos_matrix * Translate(0.5, 0.0, -2.0) * RotateY(90);
-    drawBuilding(position, vec3(2.0, 1.25, 2.0), 0, STONE);
+    drawBuilding(position, vec3(1.9, 1.25, 2.0), 0, STONE);
     
     //---- shop 4
     position = grid_pos_matrix * Translate(0.5, 0.0, -4.0) * RotateY(90);
-    drawBuilding(position, vec3(2.0, 1.25, 2.0), 0, BRICK);
+    drawBuilding(position, vec3(1.9, 1.25, 2.0), 0, BRICK);
     
     //---- boardwalk
+    SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 0.5);
     model = grid_pos_matrix * Translate(-1.25, 0.0, 0.0) * Scale(1.5, 0.01, 10.0);
     draw(model, CUBE, BOARDS, 4.0);
     
@@ -1793,12 +2013,289 @@ void grid20(mat4 grid_pos_matrix)
     draw(model, CUBE, SAND, 4.0);
 }
 
-//-----------CITY GRID---------
-//1------2------3------4-----17
-//5------6------7------8-----18
-//9-----10-----11-----12-----19
-//13----14-----15-----16-----20
+void grid21(mat4 grid_pos_matrix)
+{
+    //---- freeway
+    drawFreeway(grid_pos_matrix, 10.0);
+    
+    // left wall
+    mat4 model = grid_pos_matrix * Translate(4.95, 0.51, 0.0) * Scale( 0.05, 1.0, 10.0);
+    draw(model, CUBE, CEMENT, 4.0);
+}
 
+void grid22(mat4 grid_pos_matrix)
+{
+    //---- lamp post 1
+    vec3 light_position = vec3(-2.5, 0.0, -1.85);
+    drawLamp(light_position, grid_pos_matrix);
+    
+    //---- alley (top)
+    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
+    mat4 model = grid_pos_matrix * Translate( 0.0, 0.0, 4.375 ) * Scale(10.0, 0.01, 1.25);
+    draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //---- driveway
+    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
+    model = grid_pos_matrix * Translate( -0.25, 0.0, -3.0 ) * Scale(2.5, 0.01, 3.0);
+    draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //--- sidewalk side piece (lower)
+    SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
+    model = grid_pos_matrix * Translate( -0.25, 0.015, -4.75) * Scale(2.5, 0.04, 0.5);
+    draw(model, CUBE, CEMENT, 4.0);
+    
+    //---- road (right)
+    mat4 position = grid_pos_matrix * Translate(-3.5, 0.0, -3.25);
+    drawRoad(position, 4.0);
+    
+    //---- asphalt piece
+    model = grid_pos_matrix * Translate( 0.0, 0.0, 0.875 ) * Scale(10.0, 0.01, 5.75);
+    draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //---- shop 1
+    position = grid_pos_matrix * Translate(-3.25, 0.0, 2.0);
+    drawBuilding(position, vec3(3.5, 2.5, 3.5), 0, BRICK2);
+    
+    //---- lamp post 2
+    light_position = vec3(2.5, 0.0, -1.85);
+    drawLamp(light_position, grid_pos_matrix);
+    
+    //---- road (left)
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
+    position = grid_pos_matrix * Translate(3.0, 0.0, -3.25);
+    drawRoad(position, 4.0);
+    
+    //---- shop 2
+    position = grid_pos_matrix * Translate(3.0, 0.0, 2.5) * RotateY(90);
+    drawBuilding(position, vec3(2.5, 1.25, 4.0), 0, BRICK3);
+    
+    //---- shop 3
+    position = grid_pos_matrix * Translate(3.125, 0.0, -0.375) * RotateY(90);
+    drawBuilding(position, vec3(2.25, 1.25, 3.75), 0, STONE2);
+}
+
+void grid23(mat4 grid_pos_matrix)
+{
+    //---- lamp post 1
+    vec3 light_position = vec3(-2.5, 0.0, -1.85);
+    drawLamp(light_position, grid_pos_matrix);
+    
+    //---- alley (top)
+    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
+    mat4 model = grid_pos_matrix * Translate( 0.0, 0.0, 4.375 ) * Scale(10.0, 0.01, 1.25);
+    draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //---- road (verticle)
+    mat4 position = grid_pos_matrix * Translate(0.0, 0.0, 2.375) * RotateY(90);
+    drawRoad(position, 2.75);
+    
+    //---- driveway
+    model = grid_pos_matrix * Translate( 0.25, 0.0, -0.25 ) * Scale(3.0, 0.01, 2.5);
+    draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //--- sidewalk side piece
+    SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
+    model = grid_pos_matrix * Translate( -1.5, 0.015, -0.25) * Scale(0.5, 0.04, 2.5);
+    draw(model, CUBE, CEMENT, 4.0);
+    
+    //---- road (bottom left)
+    position = grid_pos_matrix * Translate(3.125, 0.0, -3.25);
+    drawRoad(position, 3.75);
+    
+    //---- Grass
+    SetMaterial( vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), 0.5);
+    model = grid_pos_matrix * Translate(-3.375, 0.0, 1.125) * Scale(3.25, 0.01, 5.25);
+    draw(model, CUBE, GRASS, 4.0);
+    
+    //---- lamp post 1
+    light_position = vec3(2.5, 0.0, -1.85);
+    drawLamp(light_position, grid_pos_matrix);
+    
+    //---- road (bottom right)
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
+    position = grid_pos_matrix * Translate(-3.125, 0.0, -3.25);
+    drawRoad(position, 3.75);
+    
+    //---- cross road
+    model = grid_pos_matrix * Translate( 0.0, 0.0, -3.0 ) * Scale(2.5, 0.01, 3.0);
+    draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //--- sidewalk side piece (lower)
+    SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
+    model = grid_pos_matrix * Translate( 0.0, 0.015, -4.75) * Scale(2.5, 0.04, 0.5);
+    draw(model, CUBE, CEMENT, 4.0);
+    
+    //---- asphault piece
+    model = grid_pos_matrix * Translate( 3.375, 0.0, 1.125 ) * Scale(3.25, 0.01, 5.25);
+    draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //---- building
+    position = grid_pos_matrix * Translate(3.125, 0.0, 2.0);
+    drawBuilding(position, vec3(2.75, 1.25, 3.5), 0.5, CSTONE);
+    
+}
+
+void grid24(mat4 grid_pos_matrix)
+{
+    //---- lamp post 1
+    vec3 light_position = vec3(-2.5, 0.0, -1.85);
+    drawLamp(light_position, grid_pos_matrix);
+    
+    //---- alley (top)
+    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
+    mat4 model = grid_pos_matrix * Translate( 0.0, 0.0, 4.375 ) * Scale(10.0, 0.01, 1.25);
+    draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //---- road (left)
+    mat4 position = grid_pos_matrix * Translate(3.5, 0.0, -3.25);
+    drawRoad(position, 3.0);
+    
+    //---- driveway
+    model = grid_pos_matrix * Translate( 0.75, 0.0, -3.0 ) * Scale(2.5, 0.01, 3.0);
+    draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //--- sidewalk finish
+    SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
+    model = grid_pos_matrix * Translate( 0.75, 0.015, -4.75) * Scale(2.5, 0.04, 0.5);
+    draw(model, CUBE, CEMENT, 4.0);
+    
+    //---- road (right)
+    position = grid_pos_matrix * Translate(-2.75, 0.0, -3.25);
+    drawRoad(position, 4.5);
+    
+    //---- Grass
+    SetMaterial( vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), vec4(0.0, 0.6, 0.3, 1.0), 0.5);
+    model = grid_pos_matrix * Translate(3.5, 0.0, 1.125) * Scale(3.0, 0.01, 5.25);
+    draw(model, CUBE, GRASS, 4.0);
+    
+    //---- lamp post 2
+    light_position = vec3(2.5, 0.0, -1.85);
+    drawLamp(light_position, grid_pos_matrix);
+    
+    //---- asphalt piece
+    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
+    model = grid_pos_matrix * Translate( -1.5, 0.0, 1.125 ) * Scale(7.0, 0.01, 5.25);
+    draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //---- shop 2
+    position = grid_pos_matrix * Translate(-3.0, 0.0, 2.375) * RotateY(-90);
+    drawBuilding(position, vec3(2.75, 1.25, 4.0), 0, BRICK3);
+    
+    //---- shop 3
+    position = grid_pos_matrix * Translate(-3.0, 0.0, -0.5) * RotateY(-90);
+    drawBuilding(position, vec3(2.0, 1.25, 4.0), 0, STONE2);
+}
+
+void grid25(mat4 grid_pos_matrix)
+{
+    //---- lamp post 1
+    vec3 light_position = vec3(-1.9, 0.0, -1.0);
+    drawLamp(light_position, grid_pos_matrix);
+    
+    //---- alley (top)
+    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
+    glUniform1i( glGetUniformLocation(program, "light_out"), false );
+    mat4 model = grid_pos_matrix * Translate( 3.5, 0.0, 4.375 ) * Scale(3.0, 0.01, 1.25);
+    draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //--- sidewalk side piece (upper)
+    SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
+    model = grid_pos_matrix * Translate( 1.75, 0.015, 4.375) * Scale(0.5, 0.04, 1.25);
+    draw(model, CUBE, CEMENT, 4.0);
+    
+    //---- road
+    mat4 position = grid_pos_matrix * Translate(3.25, 0.0, 0.875) * RotateY(90);
+    drawRoad(position, 5.75);
+    
+    //--- sidewalk side piece (vert - lower)
+    SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
+    model = grid_pos_matrix * Translate( 1.75, 0.015, -3.25) * Scale(0.5, 0.04, 2.5);
+    draw(model, CUBE, CEMENT, 4.0);
+    
+    //---- road crossway (lower)
+    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
+    model = grid_pos_matrix * Translate( 3.5, 0.0, -3.25 ) * Scale(3.0, 0.01, 2.5);
+    draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //--- sidewalk side piece (hor - lower)
+    SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 5.0);
+    model = grid_pos_matrix * Translate( 3.25, 0.015, -4.75) * Scale(3.5, 0.04, 0.5);
+    draw(model, CUBE, CEMENT, 4.0);
+    
+    //---- asphalt
+    SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 5.0);
+    model = grid_pos_matrix * Translate( 0.5, 0.0, 0.0 ) * Scale(2.0, 0.01, 10.0);
+    draw(model, CUBE, ASPHAULT, 4.0);
+    
+    //---- shop 1
+    position = grid_pos_matrix * Translate(0.5, 0.0, 3.5) * RotateY(90);
+    drawBuilding(position, vec3(2.9, 1.25, 2.0), 0, CSTONE);
+    
+    //---- shop 2
+    position = grid_pos_matrix * Translate(0.5, 0.0, 0.75) * RotateY(90);
+    drawBuilding(position, vec3(2.4, 1.25, 2.0), 0, BRICK3);
+    
+    //---- shop 3
+    position = grid_pos_matrix * Translate(0.5, 0.0, -2.0) * RotateY(90);
+    drawBuilding(position, vec3(1.9, 1.25, 2.0), 0, STONE);
+    
+    //---- shop 4
+    position = grid_pos_matrix * Translate(0.5, 0.0, -4.0) * RotateY(90);
+    drawBuilding(position, vec3(1.9, 1.25, 2.0), 0, BRICK2);
+    
+    //---- boardwalk
+    SetMaterial(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), vec4(0.8, 0.8, 0.8, 1.0), 0.5);
+    model = grid_pos_matrix * Translate(-1.25, 0.0, 0.0) * Scale(1.5, 0.01, 10.0);
+    draw(model, CUBE, BOARDS, 4.0);
+    
+    //---- beach
+    model = grid_pos_matrix * Translate(-3.5, 0.0, 0.0) * Scale(3.0, 0.01, 10.0);
+    draw(model, CUBE, SAND, 4.0);
+}
+
+void grid26(mat4 grid_pos_matrix)
+{
+    //---- freeway
+    drawFreeway(grid_pos_matrix, 10.0);
+    
+    // left wall
+    mat4 model = grid_pos_matrix * Translate(4.95, 0.51, 0.0) * Scale( 0.05, 1.0, 10.0);
+    draw(model, CUBE, CEMENT, 4.0);
+    
+    // right wall
+    model = grid_pos_matrix * Translate(-4.95, 0.51, 0.0) * Scale( 0.05, 1.0, 10.0);
+    draw(model, CUBE, CEMENT, 4.0);
+}
+
+void waterGrid(mat4 grid_pos_matrix)
+{
+    //---- Ocean
+    mat4 model = grid_pos_matrix * Scale(10.0, 0.01, 10.0);
+    draw(model, CUBE, WATER, 4.0);
+}
+
+void beachGrid(mat4 grid_pos_matrix)
+{
+    //---- Beach
+    mat4 model = grid_pos_matrix * Translate(0.0, 0.0, 2.5) * Scale(10.0, 0.01, 5.0);
+    draw(model, CUBE, SAND, 4.0);
+    
+    //---- River
+    model = grid_pos_matrix * Translate(0.0, 0.0, -2.5) * Scale(10.0, 0.01, 5.0);
+    draw(model, CUBE, WATER, 4.0);
+}
+
+//-----------CITY GRID---------
+//1------2------3------4-----17----W
+//5------6------7------8-----18----W
+//9-----10-----11-----12-----19----W
+//13----14-----15-----16-----20----W
+//21----22-----23-----24-----25----W
+//26----B------B------B------B-----W
 // Grid 11 = (0,0) = CENTER
 // 10 x 10 Grids
 void loadGrids()
@@ -1812,6 +2309,7 @@ void loadGrids()
     grid7(Translate(0.0, 0.0, 10.0));
     grid8(Translate(-10.0, 0.0, 10.0));
     grid9(Translate(20.0, 0.0, 0.0));
+    grid10(Translate(10.0, 0.0, 0.0));
     grid11(Translate(0.0, 0.0, 0.0));
     grid12(Translate(-10.0, 0.0, 0.0));
     grid13(Translate(20.0, 0.0, -10.0));
@@ -1822,6 +2320,24 @@ void loadGrids()
     grid18(Translate(-20.0, 0.0, 10.0));
     grid19(Translate(-20.0, 0.0, 0.0));
     grid20(Translate(-20.0, 0.0, -10.0));
+    grid21(Translate(20.0, 0.0, -20.0));
+    grid22(Translate(10.0, 0.0, -20.0));
+    grid23(Translate(0.0, 0.0, -20.0));
+    grid24(Translate(-10.0, 0.0, -20.0));
+    grid25(Translate(-20.0, 0.0, -20.0));
+    grid26(Translate(20.0, 0.0, -30.0));
+    //Water grids (ocean and river)
+    waterGrid(Translate(-30.0, 0.0, 20.0));
+    waterGrid(Translate(-30.0, 0.0, 10.0));
+    waterGrid(Translate(-30.0, 0.0, 0.0));
+    waterGrid(Translate(-30.0, 0.0, -10.0));
+    waterGrid(Translate(-30.0, 0.0, -20.0));
+    waterGrid(Translate(-30.0, 0.0, -30.0));
+    beachGrid(Translate(-20.0, 0.0, -30.0));
+    beachGrid(Translate(-10.0, 0.0, -30.0));
+    beachGrid(Translate(0.0, 0.0, -30.0));
+    beachGrid(Translate(10.0, 0.0, -30.0));
+    
 }
 
 void
@@ -1833,30 +2349,35 @@ display( void )
     
     loadGrids();
     
-    //grid11(Translate(-10.0, 0.0, 10.0));
-    //grid8(Translate(0.0, 0.0, 0.0));
+    //grid12(Translate(0.0, 0.0, 0.0));
+    //grid22(Translate(10.0, 0.0, 0.0));
+    //grid23(Translate(0.0, 0.0, 0.0));
+    //grid24(Translate(-10.0, 0.0, 0.0));
+    //grid25(Translate(-20.0, 0.0, 0.0));
     
+    // Sky
+    mat4 model = Scale(80.0, 80.0, 80.0);
+    draw(model, SPHERE, SKY, 4.0);
+    
+    /*
     //---- sphere w/ cube map
     
      glActiveTexture( GL_TEXTURE1 );
-     glBindTexture( GL_TEXTURE_CUBE_MAP, textures[14] );
+     glBindTexture( GL_TEXTURE_CUBE_MAP, textures[16] );
      glUniform1i( glGetUniformLocation(program, "light_out"), false );
      glUniform1i( glGetUniformLocation(program, "texture_on"), true );
      glUniform1i( glGetUniformLocation(program, "cube_map_on"), true );
      glUniform1f( glGetUniformLocation(program, "st_factor"), 1.0 );
      
      SetMaterial( vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), vec4(1.0,1.0,1.0,1.0), 2.0);
-     
-     mat4 transform_bube = Translate( 0.0, 1.0, -1.0 ) * RotateY(180) * Scale(80.0, 80.0, 80.0);
+     mat4 transform_bube = Translate( 0.0, 0.0, 0.0 ) * Scale(85.0, 85.0, 85.0);
      glUniformMatrix4fv( glGetUniformLocation( program, "model" ), 1, GL_TRUE, transform_bube );
-     
      glVertexAttribPointer( vPosition, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(SPHERE_OFFSET) );
      glVertexAttribPointer( vNormal, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(SPHERE_N_OFFSET) );
      glVertexAttribPointer( vTexCoord, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(SPHERE_TEX_OFFSET) );
-     glDrawArrays( GL_TRIANGLES, 0, NumVerticesSphere );
      glUniform1i( glGetUniformLocation(program, "texture_on"), false );
      glUniform1i( glGetUniformLocation(program, "cube_map_on"), false );
-    
+    */
     glutSwapBuffers();
 }
 //----------------------------------------------------------------------------

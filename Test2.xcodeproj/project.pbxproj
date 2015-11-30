@@ -27,12 +27,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		6531E1901C0AF24B00E342F5 /* negx_s.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = negx_s.bmp; sourceTree = "<group>"; };
-		6531E1911C0AF24B00E342F5 /* negy_s.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = negy_s.bmp; sourceTree = "<group>"; };
-		6531E1921C0AF24B00E342F5 /* negz_s.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = negz_s.bmp; sourceTree = "<group>"; };
-		6531E1931C0AF24B00E342F5 /* posx_s.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = posx_s.bmp; sourceTree = "<group>"; };
-		6531E1941C0AF24B00E342F5 /* posy_s.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = posy_s.bmp; sourceTree = "<group>"; };
-		6531E1951C0AF24B00E342F5 /* posz_s.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = posz_s.bmp; sourceTree = "<group>"; };
 		6549B2BC1BF11B7800751B0D /* loadBMP.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = loadBMP.cpp; path = Test2source/loadBMP.cpp; sourceTree = SOURCE_ROOT; };
 		65555CE81B97644500F8FA34 /* Test2 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Test2; sourceTree = BUILT_PRODUCTS_DIR; };
 		65555CF21B9764D800F8FA34 /* Angel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Angel.h; path = Test2source/Angel.h; sourceTree = SOURCE_ROOT; };
@@ -81,12 +75,6 @@
 		65555CEA1B97644500F8FA34 /* Test2 */ = {
 			isa = PBXGroup;
 			children = (
-				6531E1901C0AF24B00E342F5 /* negx_s.bmp */,
-				6531E1911C0AF24B00E342F5 /* negy_s.bmp */,
-				6531E1921C0AF24B00E342F5 /* negz_s.bmp */,
-				6531E1931C0AF24B00E342F5 /* posx_s.bmp */,
-				6531E1941C0AF24B00E342F5 /* posy_s.bmp */,
-				6531E1951C0AF24B00E342F5 /* posz_s.bmp */,
 				65555CF21B9764D800F8FA34 /* Angel.h */,
 				65555CF31B9764D800F8FA34 /* CheckError.h */,
 				65555CF41B9764D800F8FA34 /* example1.cpp */,
